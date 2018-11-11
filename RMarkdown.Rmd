@@ -1,0 +1,39 @@
+---
+title: "GERS2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r }
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+
+ebird <- read.csv("eBird_workshop.csv")
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+
+a_states <- c("AK","AZ","AR","AL")
+
+mebird <- ebird %>%
+     mutate(a_state = ifelse(state %in% a_states, 1, 0),
+                   state_year = paste0(state,"_",year),
+                   river = "Pascagoula")
+
+
+head(mebird)
+
+ggplot(data=mebird, 
+       aes(x=year, y=presence))+
+  geom_point()
+```
+
