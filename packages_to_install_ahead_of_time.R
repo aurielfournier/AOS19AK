@@ -5,7 +5,7 @@
 
 install.packages(c("tidyr","dplyr",
                    "ggplot2",'ggthemes',"RColorBrewer",
-                   "gridExtra"))
+                   "cowplot"))
 
 # to make sure everything installed correctly run these lines
 

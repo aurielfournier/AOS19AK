@@ -6,12 +6,11 @@ sem<-function(x, na.rm = TRUE){
   sd(x, na.rm = na.rm)/sqrt(length(x))
 }
 
-data<-sample.int(100,10,
-             replace=TRUE)
+sem(abird$samplesize)
 
-c(hi = mean(data) + sem(data),
-  mean = mean(data),
-  lo = mean(data) - sem(data))
+c(hi = mean(abird$samplesize) + sem(abird$samplesize),
+  mean = mean(abird$samplesize),
+  lo = mean(abird$samplesize) - sem(abird$samplesize))
 
 #And we can create a list of all these functions, so we never have to write them again, just load them. And we'll show you how to do this today.
 
@@ -24,8 +23,6 @@ sd
 
 # you see that? That's actually the underlying code in the function.
 
-
-
 # but why do this?
 # 1. It's much cleaner. Typing sd() and not having anyone worry about the underlying stuff can be good for readability.
 # 2. It's reproduciable, and no one can mess with the function. This code will work everytime the way its supposed to, there's no accidently messing up the code. You can hand this to someone and it will always work. And then hark back to #1
@@ -33,69 +30,53 @@ sd
 # 4. It's actually more memory friendly. Lets actually look at that. Here's a function.
 # say we wanted to find the range of a vector. A post the maxinum, minimum, and range. How might we do that
 
-
 ### CHALLENGE 
 
 # I want to create a function that converts farenheit measurements to celsius. Lets see if we can do that real quick
 
-temp_fun <- function(temp_values){
+# (F - 32) * 5/9
+
+f_to_c <- function(temp_values){
   (temp_values - 32) * 5/9
 }
 
 # What if we want to add an extra layer of complexity? 
+# nesting functions
 
-temp_fun <- function(temp_values, input_temp){
-  if(input_temp=="F"){return((temp_values - 32) * 5/9)}
-  if(input_temp=="K"){return(temp_values - 273.15)}
-  if(input_temp=="C"){return(temp_values)}
+# discuss default arguments
+
+temp_to_c <- function(temp_values, input_temp="F"){
+  if(input_temp=="F"){
+    newtemps <-  f_to_c(temp_values)}
+  if(input_temp=="K"){newtemps <- temp_values - 273.15}
+  if(input_temp=="C"){newtemps <- temp_values}
+  return(newtemps)
 }
 
-######
-# What we start learning now are functions that are useful not just for our function writing but for your future codes in general.
-#teach print
-#As you get farther into programming youll find it useful to print out messages. Either something like 'Hey im starting', or 'oops i stopped', 'or you messed up!'. And if you get tired of your favorite R functions giving you illogical error messages you can even start writing in your own error messages. 
+### Challenge 1
 
-#The simple function to do this is print(). with fairly easy syntax
-?print
-print(i)
+# Build off of our temp to c function, and create a function that can convert from F, K or C to F, K or C. 
 
-#Whatever you put in quotes will be printed to the console. This is useful because it will print out while code is going, including inside functions and for loops. Meaning you can put in status messages
+# F to C (temp - 32) * 5/9
+# K to C (temp - 273.15)
+# C to K (temp + 273.15)
+# C to F (temp * 9/5) + 32
+# F to K (temp − 32) × 5/9 + 273.15
 
-#for example
 
-for(i in 1:100000000){
-  if(i==1) {print('im thinking')}
-  # do some stuff
-  if(i==100000000/2) {print('im thinking hard')}
-  # do some more stuff
-  if(i==100000000){print('im done')}
-}
+### Challenge 2
 
-my.fun1<-function(){
-  print('im thinking')
-}
-my.fun1()
+# Look through some themes in ggthemes, pull out the code, and customize atleast one argument to make your own ggplot theme
 
-#Theres a function that is very useful with the print function and gives a bit of an intro into more programming-esque functions. One of the first lessons is the If statement. This is part of the control structure of programming codes. They direct how codes are supposed to run. And are some of the fundamentals of programming.
+# remember if you put in the name of the function, with (), the code behind it will print out
 
-#An If statement reads like this, IF something is true or false then DO something specific. So  write it out. If I am hungry then I will eat. so If something was true, I am hungry, then I should DO something. 
 
-#In R it works like this. 
-if(TRUE){print('I did it')}
-if(FALSE){print('I did it')}
-#So it splits out into two directions. And either does or doesnt do something. And this can be any statement as long as it makes a resulting statement that is either true or false
-x<-1
-if(x==1){print('I did it')}
-x<-2
 
-#And while currently it doesnt do anything if its not true, you can make it do something if the statement is not true.
 
-if(TRUE){print('i did it')} else {'i didnt do it'}
-if(FALSE){print('i did it')} else {'i didnt do it'}
+### Paste Functions
 
-#
-#paste
-#A very powerful tool in programming is the ability to create dynamic messages or outputs. For instance, in this code, what if we wanted to add to our error message and them them what Confidence interval they actual put in? You do this with paste. In other languages this is the same as concatenate. 
+
+# Whatever you put in quotes will be printed to the console. This is useful because it will print out while code is going, including inside functions and for loops. Meaning you can put in status messages
 
 ?paste
 ?paste0
@@ -120,9 +101,13 @@ paste0('i am a: ',i)
 #For instance say you have a set of data but is seperated by state. You could input:
   
 state<-'AZ'
+
 paste0('myfiles_',state,'.csv')
+
 state<-c('AZ','TX')
+
 paste0('myfiles_',state,'.csv')
+
 read.csv(paste0('myfiles_',state,'.csv'))
   
 #So you can use this in for loops to load multiple files at once, or decide what to load.
@@ -130,44 +115,45 @@ read.csv(paste0('myfiles_',state,'.csv'))
 #Same with file saving
   
 extension<-'final1'
+
 write.csv(data,paste0('myfiles_',extension,'.csv'))
   
-
-
 #So I want us to break out and try something real quick. I want this function to not only return our list, but tell us (print) the upper, lower, and mean value. Can you do this?
 
 temp_fun <- function(temp_values, input_temp){
-  if(input_temp=="F"){return(paste0('The temp has been converted to', input_temp, " ", (temp_values - 32) * 5/9))}
-  if(input_temp=="K"){return(paste0('The temp has been converted to', input_temp, " ", temp_values - 273.15))}
-  if(input_temp=="C"){return(paste0('The temp has been converted to ', input_temp, " ", temp_values))}
-}
+  if(input_temp=="F"){return(paste0('The temp has been converted to ', 
+          input_temp, " ", 
+          f_to_c(temp_values)))}
+  if(input_temp=="K"){return(paste0('The temp has been converted to ', 
+          input_temp, " ", 
+          temp_values - 273.15))}
+  if(input_temp=="C"){return(paste0('The temp has been converted to ', 
+          input_temp, " ", 
+          temp_values))}
+}   
 
 
-#And weve basically created our function. And you can make these for anything you do often. To solve any problems you have.
-# Not every situation is 
-# Troubleshooting, its defintely an end game
-# Changed inputs. 
-# Sharing
+#And weve basically created our function. And you can make these for anything you do often. To solve any problems you have
+
+
+# FOR LOOPS
 
 for(i in 1:10){ 
   print(i) 
 }   ###what did this do?
+
 i<-1
 print(i)
 i<-2
 print(i)
 i<-3
 print(i)
+
 # it wrapped through all values between 1 and 10...
+
 for(i in 1:10){
-  #stores the value as the variable i (or any variable name we told it to)
-  i<-1
-  #and then runs EVERYTYHING between the brackets with the variable as that value
   print(i) 
 }
-
-i<-2
-print(i)
 
 # it then does this for the 1st value, then the 2nd, and so on until all values have been looped through the entire sequence of whatever it is we give to it
 
@@ -189,30 +175,19 @@ for(i in c('Matt','Auriel','Liz')){
   if(i=="Auriel"){print('Auriel is not')}
 }
 ## for loops are useful for refering to rows or columns in a data set if we just feed it sequential numbers
-data<-matrix(1:100,nrow=10,ncol=10)
-data
 
 for(i in 1:10){
-  print(data[i,1])
+  print(abird[i,"species"])
 }    ### is going to loop through all the rows in column 1 (and print that value)
 
 for(i in 1:10){
-  print(data[i,2])
+  print(abird[i,2])
 }    ###loops through all the rows in column 2 (and prints that value)
 
 for(i in 1:10){
-  print(data[i,1]+5)
+  print(abird[i,"samplesize"]+5)
 }   ###loops through all the rows in column 1 and adds 5 to that value
 
-data[,1] <- 100
-
-for(i in 1:10){
-  data[i,2]<-data[i,1]+10
-}   ###does the same thing but stores the value in the correct row in column 2
-
-data
-
-data[,2]<- data[,1]+10  ###is the best way to do this particular task
 
 #At this point you may be asking, well this is extremely useful or but wait Matt, that's not how you do that. 
 # You're correct, for loops are one of the bases of all of programming. But, R has already written many of its functions with internal for loops, but in the C++ code, not in the R code.
@@ -249,7 +224,8 @@ for(i in c(1,2,NA,4)){
 for(i in 1:10){
   #i<-1
   mean(i)+2
-  print(paste0('the answer is: ', i))}
+  print(paste0('the answer is: ', i))
+}
 
 
 ##############################

@@ -1,7 +1,5 @@
 ### -- Introduction and refreshers for R
-### -- By - Matt Boone (2015) & Auriel Fournier (2015)
-### -- Modified by Auriel Fournier for 2016 NAOC Workshop
-### -- https://github.com/aurielfournier/GERS2018  
+### -- https://github.com/aurielfournier/AOS19AK
 
 #######################################
 ### -- Necessary packages
@@ -10,6 +8,11 @@
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+# if these do not load, run the matching one of these below
+# install.packages("dplyr")
+# install.packages("tidyr")
+# install.packages("ggplot2")
+
 
 ###################
 ### -- Loading In The Data
@@ -21,9 +24,7 @@ library(ggplot2)
 
 ebird <- read.csv("eBird_workshop.csv")
 
-# Explain What Pipes are %>% 
-
-# Explain the verbs of dplyr
+# Explain how to leave comments 
 
 #########################
 ### -- Filtering
@@ -33,13 +34,27 @@ ebird %>%
         filter(state=='AK',
                year==2008)
 
+# Explain What Pipes are %>% 
+
+# explain assignment operators
 a = 100
 a <- 100
 
+# filter is for rows
+# select is for columns
+
+## With pipes
 ebird %>%
   filter(state=='AK',
          year==2008) %>% 
         select(state, samplesize, presence)
+
+## Without pipes
+
+ebird_filter <- filter(ebird, state=="AK",year==2008)
+
+select(ebird_filter, state, samplesize, presence)
+
 
 # the "|" means 'or' in R
 ebird %>%
@@ -49,22 +64,18 @@ ebird %>%
 
 # the "&" means "and" in R
 ebird %>%
-          filter(year>=2014&year<=2018) %>% distinct(year)
+          filter(year>=2014&year<=2018) %>% 
+          distinct(year)
 
 #########################
 ### -- Match %in%   
 #########################
 
-sub_state <- c("AZ","NM","NV","CO")
+a_states <- c("AZ","AK","AL","AR")
 
 ebird %>%
-          filter(state %in% sub_state) %>% 
+          filter(state %in% a_states) %>% 
           distinct(state)
-
-gdat <- ebird %>%
-        filter(state %in% sub_state)
-
-distinct(gdat, state)
 
 
 #########################
@@ -85,17 +96,14 @@ ebird %>%
 ### -- CHALLENGE
 #########################################
 
-# What is the median samplesize and presence for 
+# What is the median samplesize for 
 # Arizona, Alaska, Arkansas and Alabama after 2014?
-
-a_states <- c("AZ","AK","AR","AL")
 
 new_data <- ebird %>% 
   filter(state %in% a_states,
-         year > 2014) %>% #distinct(continent)
+         year > 2014) %>% 
   group_by(state) %>%
-  summarise(medianS = median(samplesize),
-            medianP = median(presence))
+  summarise(medianS = median(samplesize))
 
 
 #note to self talk about Kiwi vs Us spelling
@@ -107,7 +115,6 @@ new_data <- ebird %>%
 
 colors <- c("red","green")
 
-
 mebird <- ebird %>%  
   mutate(a_state = ifelse(state %in% a_states, 1, 0),
          state_year = paste0(state,"_",year)) 
@@ -115,8 +122,6 @@ mebird <- ebird %>%
 mebird %>%
   tail()
   
-
-
 ########################
 ## Separate
 ########################
@@ -149,7 +154,7 @@ ebird1 <- ebird %>%
             select(species, state, year, samplesize) %>%
             filter(year >= 2014)
 
-# point out that you can use multiple filter statements if youwant, or you can put them all in one statement, same result. 
+# point out that you can use multiple filter statements if you want, or you can put them all in one statement, same result. 
 
 years_to_keep <- c(2008:2012, 2015)
 
@@ -184,19 +189,6 @@ left_join(ebird1, ebird2, by=c("year","species","state")) %>% head()
 inner_join(ebird1, ebird2, by=c("year","species","state")) %>% distinct(year)
 
 inner_join(ebird1, ebird2, by=c("year","species","state")) %>% head()
-
-
-
-g1 <- ebird %>% select(state, year)
-
-g2 <- ebird %>% select(samplesize, presence)
-
-
-gg <- cbind(g1, g2)
-gg <- bind_cols(g1, g2)
-
-# rbind()
-# bind_rows()
 
 
 #####################################
