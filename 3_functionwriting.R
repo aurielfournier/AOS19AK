@@ -2,8 +2,10 @@
 # There's a couple of reasons learning functions is helpful. One you can write your own common functions. two you can better understand how to troubleshoot your code and other peoples functions. Three the principles of function writing teach us more about good coding tips to learn including reproduciability.  
 # What is a function and why is it necessary in R
 # A function lets you package code into one unit that doesnt need to be loaded multiple times, or rewritten.
-sem<-function(x, na.rm = TRUE){
-  sd(x, na.rm = na.rm)/sqrt(length(x))
+
+sem<-function(numbers, na.rm = TRUE){
+  se <- sd(numbers, na.rm = na.rm)/sqrt(length(numbers))
+  return(se)
 }
 
 sem(abird$samplesize)
