@@ -1,10 +1,10 @@
 ########LESSON 3 ###############
-### -- Commonly used tools in R for more complicated tasks
+### -- Commonly used tools in R for repeated tasks
 ### -- By - Evan Adams, Matt Boone, and Auriel Fournier
 ### -- https://github.com/aurielfournier/AOS2019AK
 
 
-### Commonly used tools in R for more complicated tasks
+### Commonly used tools in R for repeated tasks
 
 # use install.packages() if you don't have these already
 library(dplyr)
@@ -13,11 +13,14 @@ library(ggplot2)
 
 ### Paste Functions
 
-# Whatever you put in quotes will be printed to the console. This is useful because it will print out while code is going, including inside functions and for loops.
+# Whatever you put in quotes will be printed to the console. This is useful because it will print out while code is running, including inside functions and for loops.
 
 ?paste
 ?paste0
 x <- 'evan'
+
+# quite note: R assumes that anything written in ' ' is a character string, including numbers and other things that look like numerical data
+
 paste0('hello','my','name','is',x)
 paste('hello','my','name','is',x)
 #How these work is they 'paste' together whatever things you give it, exactly how you tell it to
@@ -34,7 +37,7 @@ i <- 'the best'
 
 paste0('i am ',i)
 
-#Paste is most useful with two things. Reading/writing in files and in concert with the print function.
+#Paste is most useful with two things. Reading/writing in files and in concert with the print function (e.g., it's the thing  that allows functions to give you error messages).
 #For instance say you have a set of data but is seperated by state. You could input:
 
 state <- 'AZ'
@@ -69,7 +72,7 @@ for(i in 1:10){
 #well let's look at 1:10 see what that looks like
 1:10
 
-#so it created a vector of integers from 1 to 10. Since we told the loop that I was supposed to take on those values and that we should print them, the loop went through each value in sequence and executed the command
+#so it created a vector of integers from 1 to 10. Since we told the loop that i was supposed to take on those values and that we should print them, the loop went through each value in sequence and executed the command
 #you can break down what it is doing into component parts fairly easily
 i<-1
 print(i)
@@ -99,9 +102,19 @@ table(abird$species)
 #okay, that's a lot of species, too many for us to deal with here. Let's use some data management tricks to select the species that are most common in these areas
 #here we are summing the total numbers of states and years that we see each species in the data set
 #I use rowSums to add all the combinations up
+
+?rowSums
+
 spp.sum <- rowSums(matrix(table(abird$species, abird$state), ncol = 50, byrow = FALSE))
+View(spp.sum)
 
 #select species with 44 state/years of data
+
+#with piping
+spp.select <- spp %>5%
+	filter(species %in% spp.select)
+
+#or without piping using a which() command like you used filter() earlier
 spp.select <- spp[which(spp.sum == 44)]
 
 #this is still 60 species, so let's just look at the first 10 so we can try something without it taking too long
@@ -113,8 +126,7 @@ spp.select <- spp.select[1:10]
 abird.species <- abird %>%
                    filter(species %in% spp.select)
 
-#or without piping using a which() command like you used filter() earlier
-
+#without piping
 abird.species <- abird[which(abird$species %in% spp.select),]
 
 #let's plot changes in presence over year by state for each species we selected using a for loop
@@ -123,10 +135,15 @@ abird.species <- abird[which(abird$species %in% spp.select),]
 for(i in spp.select){
   #select the species and make a temporary data frame for the loop
   abird.tmp <- abird.species[which(abird.species$species == i),]
+  
   #ggplot code (in slightly different syntax than before) that plots points and lines for each state
-  p <- ggplot(abird.tmp, aes(x = year, y = presence, group = state, color = state)) #should I use the terminology established earlier? Is it okay to introduce a new diction so soon?
+  #describe the data.frame and aesthetics
+  p <- ggplot(abird.tmp, aes(x = year, y = presence, group = state, color = state))
+  #then add the individual plots and graphics commands to that general ggplot fxn
   p <- p + geom_point() + geom_line() + ggtitle(i)
   plot(p)
+  
+  #save the figure using the paste function that we talked about earlier
   ggsave(file = paste0(i, '_ebird','.png'), device = 'png', dpi = 300)
 }
 
@@ -134,7 +151,7 @@ for(i in spp.select){
 #let's dissect what happened here:
 #we made a list of species that we wanted to make a figure for
 #then we selected data from our ebird data frame for each of the species that we wanted
-#we built a ggplot figure based upon the species data
+#we built a ggplot figure based upon the species data (using paste to customize the figures)
 #then we used the name of the species to build a file name so that we can save unique files for each
 
 #for loops are a pretty powerful strategy in R and figuring out how to get your code to run in for loops can save you a ton of time and energy and is often well worth it
@@ -168,41 +185,14 @@ for(i in spp.select){
   #then the statement for what to do when the if statement is false:
   
   else{
-    print('NOPE!')
+    print(paste0(i,' does not meat the criteria')
   }
 }
 
 #well that cut down on the number of graphs by a fair amount
-#note the if/else structure in the loop, if the if statement is TRUE, the first statement in the brackets if run. If it's FALSE then the else statement is run. The else statement isn't required, you can just use the if portion.
+#reminder: the if/else structure in the loop, if the if statement is TRUE, the first statement in the brackets if run. If it's FALSE then the else statement is run. The else statement isn't required, you can just use the if portion.
 #the if statement must result in a boolean response (TRUE/FALSE)
 
-## CHALLENGE
-#create a loop that makes a presence over time graph for each species. For species with above median presence for our 10 species group let's use a smooth line, for below median species let's just use points with no line
-
-median(abird$presence)
-
-for(i in spp.select){
-  #select the species and make a temporary data frame for the loop
-  abird.tmp <- abird.species[which(abird.species$species == i),]
-  #the conditional if statement that does something different for 'above-median species'
-  if(median(abird.tmp$presence) > median(abird.species$presence)){
-    #the same ggplot plot code as before
-    p <- ggplot(abird.tmp, aes(x = year, y = presence, group = state, color = state))
-    p <- p + geom_smooth() + ggtitle(i)
-    #plot it, notice that this plots to your RStudio 'Plots' tab
-    plot(p)
-    #now save it using the species name information that we collected
-    ggsave(file = paste0(i, '_ebird_above_med','.png'), device = 'png', dpi = 300)
-  } else{
-    #the same ggplot plot code as before
-    p <- ggplot(abird.tmp, aes(x = year, y = presence, group = state, color = state))
-    p <- p + geom_point()  + ggtitle(i)
-    #plot it, notice that this plots to your RStudio 'Plots' tab
-    plot(p)
-    #now save it using the species name information that we collected
-    ggsave(file = paste0(i, '_ebird_below_med','.png'), device = 'png', dpi = 300)
-  }
-}
 
 #Trouble-shooting for loops. For loops can be difficult to troubleshoot when they hit a snag so I wanted to give you a couple of tips on troubleshooting them.
 
@@ -232,6 +222,37 @@ for(i in 1:10){
 }
 
 
+## CHALLENGE
+#create a loop that makes a presence over time graph for each species. For species with above median presence for our 10 species group let's use a smooth line, for below median species let's just use points with no line
+
+median(abird$presence)
+
+for(i in spp.select){
+  #select the species and make a temporary data frame for the loop
+  abird.tmp <- abird.species[which(abird.species$species == i),]
+  
+  #the conditional if statement that does something different for 'above-median species'
+  if(median(abird.tmp$presence) > median(abird.species$presence)){
+    #the same ggplot plot code as before
+    p <- ggplot(abird.tmp, aes(x = year, y = presence, group = state, color = state))
+    p <- p + geom_smooth() + ggtitle(i)
+    #plot it, notice that this plots to your RStudio 'Plots' tab
+    plot(p)
+    #now save it using the species name information that we collected
+    ggsave(file = paste0(i, '_ebird_above_med','.png'), device = 'png', dpi = 300)
+  } #if
+  else{
+    #the same ggplot plot code as before
+    p <- ggplot(abird.tmp, aes(x = year, y = presence, group = state, color = state))
+    p <- p + geom_point()  + ggtitle(i)
+    #plot it, notice that this plots to your RStudio 'Plots' tab
+    plot(p)
+    #now save it using the species name information that we collected
+    ggsave(file = paste0(i, '_ebird_below_med','.png'), device = 'png', dpi = 300)
+  } #else
+} #i
+
+
 #but, for loops can be kinda slow and clunky sometimes
 #there are other ways of packaging r scripts and turning them into something that runs efficiently
 #enter, functions
@@ -256,7 +277,7 @@ c(hi = mean(abird$samplesize) + sem(abird$samplesize),
 
 # A function is the functional unit in R. R is built around vectorization and function writing.
 # Once you understand this you'll get better at understanding why R does things the way it does them. And be able to fix functions or use them for your own troubleshooting
-# A function is anything that has two parenthesis next to it. 
+# A function is anything that has two parenthesis after it's name. 
 # But a function is simply a way to package up code and run it in a confined space. For example lets look at sd
 
 sd
@@ -265,7 +286,7 @@ sd
 
 # but why do this?
 # 1. It's much cleaner. Typing sd() and not having anyone worry about the underlying stuff can be good for readability.
-# 2. It's reproduciable, and no one can mess with the function. This code will work everytime the way its supposed to, there's no accidently messing up the code. You can hand this to someone and it will always work. And then hark back to #1
+# 2. It's reproducible, and no one can mess with the function. This code will work everytime the way its supposed to, there's no accidently messing up the code. You can hand this to someone and it will always work. And then hark back to #1
 # 3. Much easier to give finished product to collaborator or someone with lower R understanding. Including package building
 # 4. It's more memory friendly.
 
@@ -283,6 +304,8 @@ f_to_c <- function(temp_values){
 # nesting functions
 
 # discuss default arguments
+
+#using if statements we can make a modal function that does fairly different things depending on what mode the user defines
 
 temp_to_c <- function(temp_values, input_temp="F"){
   if(input_temp=="F"){
@@ -312,6 +335,8 @@ dat1 <- dat.gen(4, 1, 100, 3)
 
 #we can look at the data that we generated
 summary(dat1)
+
+?hist
 hist(dat1)
 
 #if we run it again, we get a different randomly generated data set if we change the seed
@@ -326,6 +351,8 @@ hist(dat.gen(-6, 20, 100, 3))
 hist(dat.gen(0, 1, 100, 3))
 
 #finally, you can use the apply commands to apply functions across a wide range of data types
+
+?apply
 
 #using our dat.gen function, we'll make a data table with some randomly generated data in it
 
@@ -343,11 +370,11 @@ View(dat)
 #what if we want to apply a function that we made? Let's use our sem() function from earlier and see how this works
 dat$SE <- apply(dat, 1, sem)
 
-#we added a new column to the data.frame so now we can have a look at how that too
+#we added a new column to the data.frame so now we can have a look at how that works too
 View(dat)
 
-##############################
-# Summary of if and for loops
+####################################################
+# Summary of if and for loops, functions, and apply
 #####################################################################
 
 ##-'for' loops are best to do tasks that can not be vectorized or when memory is an issue
@@ -357,7 +384,7 @@ View(dat)
 ##-Neither is ideal for math, since R is very good at doing this
 ##-Exceptions are when a function can not be vectorized or when referencing previous values
 ##-Also for lowering memory usage 
-#(If your files exceed 1.5gb looping or other packages may be requried)
+##-(If your files exceed 1.5gb looping or other packages may be requried)
+##-apply is a great way to vectorize functions over large amounts of data in a way that can mimic for loops
 
 #end of lesson
-
