@@ -13,7 +13,7 @@ library(ggplot2)
 
 ### Paste Functions
 
-# Whatever you put in quotes will be printed to the console. This is useful because it will print out while code is going, including inside functions and for loops.
+# Whatever you put in quotes will be printed to the console. This is useful because it will print out while code is running, including inside functions and for loops.
 
 ?paste
 ?paste0
@@ -69,7 +69,7 @@ for(i in 1:10){
 #well let's look at 1:10 see what that looks like
 1:10
 
-#so it created a vector of integers from 1 to 10. Since we told the loop that I was supposed to take on those values and that we should print them, the loop went through each value in sequence and executed the command
+#so it created a vector of integers from 1 to 10. Since we told the loop that i was supposed to take on those values and that we should print them, the loop went through each value in sequence and executed the command
 #you can break down what it is doing into component parts fairly easily
 i<-1
 print(i)
@@ -99,23 +99,29 @@ table(abird$species)
 #okay, that's a lot of species, too many for us to deal with here. Let's use some data management tricks to select the species that are most common in these areas
 #here we are summing the total numbers of states and years that we see each species in the data set
 #I use rowSums to add all the combinations up
+?rowSums
 spp.sum <- rowSums(matrix(table(), ncol = , byrow = FALSE))
+View(spp.sum)
 
 #select species with 44 state/years of data
 spp.select <- spp[ ]
 
 #this is still 60 species, so let's just look at the first 10 so we can try something without it taking too long
 #here are the species that we want to select
-spp.select <- spp.select[ ]
+#with piping
+spp.select <- spp.select %>%
+  filter()
+
+#or without piping using a which() command like you used filter() earlier
+spp.select <- spp.select[which() ]
 
 #and here is how we are going to select species
 #with piping
 abird.species <- abird %>%
   filter( )
 
-#or without piping using a which() command like you used filter() earlier
-
-abird.species <- abird[ which( ),]
+#or without
+abird.species <- abird[ ,]
 
 #let's plot changes in presence over year by state for each species we selected using a for loop
 #we can loop around a data select and ggplot function so we can do those things repeatedly
@@ -123,10 +129,13 @@ abird.species <- abird[ which( ),]
 for(i in spp.select){
   #select the species and make a temporary data frame for the loop
   abird.tmp <- abird.species[which(),]
+  
   #ggplot code (in slightly different syntax than before) that plots points and lines for each state
-  p <- ggplot(abird.tmp, aes( )) #should I use the terminology established earlier? Is it okay to introduce a new diction so soon?
+  p <- ggplot(abird.tmp, aes( ))
   p <- p + geom_point() + geom_line() + ggtitle(i)
   plot(p)
+  
+  #using paste from earlier, we will save the  file
   ggsave(file = paste0( , , ), device = 'png', dpi = 300)
 }
 
@@ -148,6 +157,7 @@ summary(abird)
 
 #now let's implement an if statement in the previous loop
 for(i in spp.select){
+
   #select the species and make a temporary data frame for the loop
   abird.tmp <- abird.species[which( ),]
   
@@ -176,12 +186,6 @@ for(i in spp.select){
 #note the if/else structure in the loop, if the if statement is TRUE, the first statement in the brackets if run. If it's FALSE then the else statement is run. The else statement isn't required, you can just use the if portion.
 #the if statement must result in a boolean response (TRUE/FALSE)
 
-## CHALLENGE
-#create a loop that makes a presence over time graph for each species. For species with above median presence for our 10 species group let's use a smooth line, for below median species let's just use points with no line
-
-
-
-
 #Trouble-shooting for loops. For loops can be difficult to troubleshoot when they hit a snag so I wanted to give you a couple of tips on troubleshooting them.
 
 #1. Put in a line at the top that allows you to read in a dummy variable
@@ -208,6 +212,9 @@ for(i in 1:10){
   mean(i)+2
   print(paste0('the answer is: ', i))
 }
+
+## CHALLENGE
+#create a loop that makes a presence over time graph for each species. For species with above median presence for our 10 species group let's use a smooth line, for below median species let's just use points with no line
 
 
 #but, for loops can be kinda slow and clunky sometimes
@@ -314,11 +321,11 @@ View(dat)
 #what if we want to apply a function that we made? Let's use our sem() function from earlier and see how this works
 dat$SE <- apply(dat, 1, sem)
 
-#we added a new column to the data.frame so now we can have a look at how that too
+#we added a new column to the data.frame so now we can have a look at how that works too
 View(dat)
 
-##############################
-# Summary of if and for loops
+###################################################
+# Summary of if and for loops, functions, and apply
 #####################################################################
 
 ##-'for' loops are best to do tasks that can not be vectorized or when memory is an issue
@@ -328,6 +335,7 @@ View(dat)
 ##-Neither is ideal for math, since R is very good at doing this
 ##-Exceptions are when a function can not be vectorized or when referencing previous values
 ##-Also for lowering memory usage 
-#(If your files exceed 1.5gb looping or other packages may be requried)
+##(If your files exceed 1.5gb looping or other packages may be requried)
+##-apply() is a great way to use functions over vectors or lists and can be thought of as more efficient for loops
 
 #end of lesson
